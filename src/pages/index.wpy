@@ -14,10 +14,57 @@
   .userinfo-nickname {
     color: #aaa;
   }
+  
+  .wrapper{
+    position: absolute;
+    top: 0;
+    background-color: #ffffff;
+    z-index: 999;
+    display: flex;
+    justify-content: space-around;
+    overflow: hidden;
+  }
+
+  .item{
+    width: 20vw;
+    text-align: center;
+    border: 1px solid #ffffff;
+  }
+  .wrapper-content{
+    margin-top: 60rpx;
+  }
+  .list-item{
+    margin-bottom: 20rpx;
+    border-bottom: 1px solid #cfcfcf;
+  }
+  .imgStyle{
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: 50rpx;
+    vertical-align: middle;
+  }
+  .title{
+    text-align: left;
+    padding-left: 16rpx;
+  }
+  
 </style>
 <template>
-  <view class="container">
-    
+  <view>
+    <view class="wrapper">
+      <repeat for="{{topicList}}" key="index" index="index" item="item"  >
+        <view data-index="{{item.id}}" class="item" style="background-color:{{item.bgColor}}" @tap="tap" data-type="{{item.tab}}"  data-name="{{item.name}}" > {{item.name}} </view>
+      </repeat>
+    </view>
+
+    <view class="wrapper-content">
+      <repeat for="{{list}}" key="index" index="index" item="imgitem">
+        <scroll-view class="list-item"> 
+          <image class="imgStyle" src="{{imgitem.author.avatar_url}}" alt="{{imgitem.author.loginname}}" />
+          <text class="title">{{imgitem.$title}}</text>
+        </scroll-view>
+      </repeat>
+    </view>
   </view>
 </template>
 
@@ -26,12 +73,12 @@
   import Panel from '@/components/panel' // alias example
   import Counter from 'counter' // alias example
   import List from '../components/list' // aliasFields example
-  import moduleA from 'module-a' // aliasFields ignore module example
   import Group from '../components/group'
+  import Naviga from '../components/naviga'
+  import ContentList from '../components/contentlist'
   import Toast from 'wepy-com-toast'
   import testMixin from '../mixins/test'
-
-  console.log('moduleA ignored: ', moduleA) // => moduleA ignored: {}
+  import _ from 'lodash'
 
   export default class Index extends wepy.page {
     config = {
@@ -43,7 +90,9 @@
       counter2: Counter,
       list: List,
       group: Group,
-      toast: Toast
+      toast: Toast,
+      naviga: Naviga,
+      contentlist: ContentList,
     }
 
     mixins = [testMixin]
@@ -53,143 +102,115 @@
       userInfo: {
         nickName: '加载中...'
       },
-      normalTitle: '原始标题',
-      setTimeoutTitle: '标题三秒后会被修改',
-      count: 0,
-      netrst: '',
-      groupList: [
+      topicList: [
         {
-          id: 1,
-          name: '点击改变',
-          list: [
-            {
-              childid: '1.1',
-              childname: '子项，点我改变'
-            }, {
-              childid: '1.2',
-              childname: '子项，点我改变'
-            }, {
-              childid: '1.3',
-              childname: '子项，点我改变'
-            }
-          ]
+          id:0,
+          name:'全部',
+          tab:'all',
+          bgColor:'#2db7f5'
         },
         {
-          id: 2,
-          name: '点击改变',
-          list: [
-            {
-              childid: '2.1',
-              childname: '子项，点我改变'
-            }, {
-              childid: '2.2',
-              childname: '子项，点我改变'
-            }, {
-              childid: '2.3',
-              childname: '子项，点我改变'
-            }
-          ]
+          id:1,
+          name:'精华',
+          tab:'good',
+          bgColor:''
         },
         {
-          id: 3,
-          name: '点击改变',
-          list: [
-            {
-              childid: '3.1',
-              childname: '子项，点我改变'
-            }
-          ]
-        }
+          id:2,
+          name:'分享',
+          tab:'share',
+          bgColor:''
+        },
+        {
+          id:3,
+          name:'问答',
+          tab:'ask',
+          bgColor:''
+        },
+        {
+          id:4,
+          name:'招聘',
+          tab:'job',
+          bgColor:''
+        },
       ],
-      topicList:[]
+      list:[]
+      
     }
 
     computed = {
-      now () {
-        return +new Date()
-      }
+      
     }
 
     methods = {
-      plus () {
-        this.mynum++
-      },
-      toast () {
-        let promise = this.$invoke('toast', 'show', {
-          title: '自定义标题',
-          img: 'https://raw.githubusercontent.com/kiinlam/wetoast/master/images/star.png'
-        })
-
-        promise.then((d) => {
-          console.log('toast done')
-        })
-      },
-      tap () {
-        console.log('do noting from ' + this.$name)
-      },
-      communicate () {
-        console.log(this.$name + ' tap')
-
-        this.$invoke('counter2', 'minus', 45, 6)
-        this.$invoke('counter1', 'plus', 45, 6)
-
-        this.$broadcast('index-broadcast', 1, 3, 4)
-      },
-      request () {
+      tap(event){
+        console.warn(event)
+        console.warn(this)
         let self = this
-        let i = 10
-        let map = ['MA==', 'MQo=', 'Mg==', 'Mw==', 'NA==', 'NQ==', 'Ng==', 'Nw==', 'OA==', 'OQ==']
-        while (i--) {
-          wepy.request({
-            url: 'https://www.madcoder.cn/tests/sleep.php?time=1&t=css&c=' + map[i] + '&i=' + i,
-            success: function (d) {
-              self.netrst += d.data + '.'
-              self.$apply()
-            }
-          })
-        }
-      },
-      counterEmit (...args) {
-        let $event = args[args.length - 1]
-        console.log(`${this.$name} receive ${$event.name} from ${$event.source.$name}`)
-      },
-
-      requestTopic(){
+        let id = event.currentTarget.dataset.index
+        this.topicList.forEach(element => {
+          element.bgColor = ""
+        });
+        this.topicList[id].bgColor = '#2db7f5'
+        let tab = event.currentTarget.dataset.type
         wepy.request({
-          url: 'https://cnodejs.org/api/v1/get/topics',
+          url: `https://cnodejs.org/api/v1/topics?page=1&limit=10&mdrender=false&tab=${tab}`,
           success: function (res) {
-            console.console.warn(res);
+            if(res.data.success){
+              let $data = _.each(res.data.data,(item)=>{
+              item.$title= _.truncate(item.title,{
+                    'length':14,
+                }) 
+              })
+              console.warn(self)
+              console.warn($data)
+              self.setData({
+                list: $data
+              })
+            }
           }
         })
-      }
+        // this.$apply()
+      },
     }
 
     events = {
-      'index-emit': (...args) => {
-        let $event = args[args.length - 1]
-        console.log(`${this.$name} receive ${$event.name} from ${$event.source.$name}`)
-      }
+      
     }
 
     onLoad() {
       let self = this
-      console.log(this)
+      // console.log(this)
       this.$parent.getUserInfo(function (userInfo) {
         if (userInfo) {
           self.userInfo = userInfo
         }
-        self.normalTitle = '标题已被修改'
-
-        self.setTimeoutTitle = '标题三秒后会被修改'
-        setTimeout(() => {
-          self.setTimeoutTitle = '到三秒了'
-          self.$apply()
-        }, 3000)
-
-        self.$apply()
+        // self.$apply()
       })
 
-      this.requestTopic()
+       wepy.request({
+          url: `https://cnodejs.org/api/v1/topics?page=1&limit=10&mdrender=false&tab=all`,
+          success: function (res) {
+            if(res.data.success){
+              let $data = _.each(res.data.data,(item)=>{
+              item.$title= _.truncate(item.title,{
+                    'length':14,
+                }) 
+              })
+
+              self.setData({
+                list:$data
+              })
+              console.warn(self)
+            }
+          }
+        })
+
+        self.$apply()
+    }
+
+    onShow (){
+      
     }
   }
 </script>

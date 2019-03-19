@@ -29,7 +29,6 @@
 <template>
   <view class="panel">
     <slot name="title">
-      Title
     </slot>
     <slot>
     </slot>

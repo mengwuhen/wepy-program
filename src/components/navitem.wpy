@@ -1,0 +1,66 @@
+<style type="less">
+.navitem {
+}
+.wrapper{
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .item{
+    width: 20vw;
+    text-align: center;
+    /* padding: 1rem; */
+    /* border: 1px solid #ffffff; */
+  }
+
+  .imgStyle{
+    width: 15vw;
+    border-radius: 50%;
+    height: 15vh;
+  }
+</style>
+<template>
+  <view class="">
+    <view data-index="{{nitem.id}}" class="item " style="background-color:{{nitem.bgColor}}" @tap="tap" data-type="{{nitem.tab}}"  data-name="{{nitem.name}}" > {{nitem.name}} </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+
+  export default class NavItem extends wepy.component {
+   props = {
+      nitem: {},
+    }
+    data = {
+      list:[]
+    }
+    methods = {
+      tap(event){
+        var self = this
+        let id = event.currentTarget.dataset.index
+        this.$parent.topicList.forEach(element => {
+          element.bgColor = ""
+        });
+        this.$parent.topicList[id].bgColor = '#2db7f5'
+        let tab = event.currentTarget.dataset.type
+        wepy.request({
+          url: `https://cnodejs.org/api/v1/topics?page=1&limit=10&mdrender=false&tab=${tab}`,
+          success: function (res) {
+            if(res.data.success){
+              // console.warn(self)
+              self.data.list = res.data.data
+              self.list = res.data.data
+            }
+          }
+        })
+        this.$apply();
+      }
+    }
+
+    event={
+
+    }
+
+
+  }
+</script>

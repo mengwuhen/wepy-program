@@ -6,11 +6,13 @@
 		"postcss": false,
 		"minified": false,
 		"newFeature": true,
-		"autoAudits": false
+		"autoAudits": false,
+		"disableScroll": true
 	},
 	"compileType": "miniprogram",
 	"appid": "wx7255a83acaa0e1ef",
 	"projectname": "node-share",
 	"miniprogramRoot": "dist/",
 	"condition": {}
+	
 }
